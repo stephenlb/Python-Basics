@@ -2,14 +2,16 @@
 
  - [x] Literals
  - [x] Variables
- - [ ] Flow control (if/elif/else)
+ - [x] Flow control (if/elif/else)
  - [ ] Loops (while/for loops)
  - [ ] Array
  - [ ] F Strings
  - [ ] Objects
  - [ ] Classes
+ - [ ] Operators + - / * % ^
  - [ ] Inheritance
  - [ ] Map/Rudce
+ - [ ] Binary manipulation
  - [ ] Lambda / Functional / Closures
  - [ ] Cloujre
  - [ ] List Comprehension
@@ -40,6 +42,8 @@
      - [ ] MANIM ?!??!?!?!
 
  - [ ] Advancd libs
+     - [ ] Coroutines
+        - [ ] generators iterators and yeild
     - [ ] tkinter GUI
     - [ ] qt GUI
     - [ ] Selinium QA automation
