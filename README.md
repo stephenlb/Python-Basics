@@ -14,7 +14,8 @@ vim - stock vim
  - [x] Loops (while/for loops)
  - [x] Type annotations 🐍
  - [x] F Strings
- - [ ] Array
+ - [x] Array
+ - [x] Array Slices
  - [ ] Dictionaries
  - [ ] Kwargs
  - [ ] Objects
