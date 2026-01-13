@@ -1,18 +1,24 @@
 # Python Basics
 
+
+## My Setup
+Ghostty - terminal emulator
+Tmux - window pane manager inside Ghostty
+vim - stock vim
+
  - [x] Literals
  - [x] Variables
  - [x] Flow control (if/elif/else)
- - [ ] Bypass indentation
- - [ ] Loops (while/for loops)
- - [ ] Indentation 🐍
- - [ ] Type annotations 🐍
+ - [x] Bypass indentation
+ - [x] Indentation 🐍
+ - [x] Loops (while/for loops)
+ - [x] Type annotations 🐍
+ - [x] F Strings
  - [ ] Array
+ - [ ] Dictionaries
  - [ ] Kwargs
- - [ ] F Strings
  - [ ] Objects
  - [ ] Classes
- - [ ] Ternary Operators - ~ 
  - [ ] Unarry Operators - ~ 
  - [ ] Comparison Operators == < > <= >=
  - [ ] Math Operators + - / * % ^
