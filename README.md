@@ -15,8 +15,8 @@ vim - stock vim
  - [x] F Strings
  - [x] Array
  - [x] Array Slices
- - [ ] Dictionaries / Objects
- - [ ] KWargs
+ - [x] Dictionaries / Objects
+ - [x] KWargs
  - [ ] Classes
  - [ ] Inheritance
  - [ ] Unarry Operators - ~ 
