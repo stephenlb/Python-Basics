@@ -18,16 +18,16 @@ vim - stock vim
  - [x] Dictionaries / Objects
  - [x] KWargs
  - [x] Dunder methods ("Magic Methods __str__ __init__")
- - [ ] Classes
- - [ ] Inheritance
- - [ ] Unarry Operators - ~ 
- - [ ] Comparison Operators == < > <= >=
- - [ ] Math Operators + - / * % ^
+ - [x] Classes
+ - [x] Inheritance
+ - [x] Unarry Operators - + ~ * ** not(!) del
+ - [x] Comparison Operators == < > <= >=
+ - [x] Math Operators + - / * % ^
  - [ ] Logic Operators (and &&, or ||, xor ^)
- - [ ] Shrot circuts and / or
+ - [ ] Short circuts and / or
  - [ ] Bitwise Operators + - / * % ^
- - [ ] Map/Rudce
  - [ ] Binary manipulation
+ - [ ] Map/Rudce
  - [ ] Lambda / Functional / Closures
  - [ ] Cloujre
  - [ ] List Comprehension
