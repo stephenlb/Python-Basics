@@ -77,12 +77,13 @@ vim - stock vim
      - [ ] MP multiprocessing
      - [ ] MANIM ?!??!?!?!
      - [ ] Reflex Lib
+ - [ ] Graphical Application Development
+     - [ ] Tkinter
+     - [ ] PySide6 / PyQT6
 
  - [ ] Advancd libs
      - [ ] Coroutines
         - [ ] generators iterators and yeild
-    - [ ] tkinter GUI
-    - [ ] qt GUI
     - [ ] Selinium QA automation
     - [ ] Textual TUI lib
     - [ ] pillow "PIL" images
