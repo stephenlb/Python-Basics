@@ -45,6 +45,7 @@ vim - stock vim
  - [x] Closures
  - [x] @Decorators
  - [x] Lambda / Functional
+ - [x] Double Linked List sorted binary tree!????
  - [ ] List Comprehension
  - [ ] Dictionary Comprehension
  - [ ] functools
