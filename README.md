@@ -17,6 +17,12 @@ Ghostty - terminal emulator
 Tmux - window pane manager inside Ghostty
 vim - stock vim
 
+ python
+ numpy
+ pandas
+ scikit
+ pytorch
+ matplotlib
  - [x] Literals
  - [x] Variables
  - [x] Flow control (if/elif/else)
@@ -46,8 +52,8 @@ vim - stock vim
  - [x] @Decorators
  - [x] Lambda / Functional
  - [x] Double Linked List sorted binary tree!????
- - [ ] List Comprehension
- - [ ] Dictionary Comprehension
+ - [x] List Comprehension
+ - [x] Dictionary Comprehension
  - [ ] functools
  - [ ] Type casting
  - [ ] Writing/Reading files
