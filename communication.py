@@ -14,6 +14,9 @@ subscribeKey = 'demo'
 # flag to help with graceful shutdown
 running = True
 
+# Track active streams per channel
+active_streams = {}
+
 ## update running flag
 def update_running(value: bool):
     global running
@@ -22,13 +25,14 @@ def update_running(value: bool):
 ## Connect To a Channel
 def stream(channel: str, callback):
     tt = '0'
-    while running:
+    while running and channel in active_streams:
         receive_url = f'https://ps.pndsn.com/subscribe/{subscribeKey}/{channel}/0/{tt}'
         try:
             response = requests.get(receive_url)
             data = response.json()
             tt = data[1]
-            callback(data)
+            # Pass channel info along with data
+            callback(channel, data)
         except Exception as e:
             print(e)
             continue
@@ -36,12 +40,29 @@ def stream(channel: str, callback):
             time.sleep(0.1)
 
 def startStream(channel: str, callback):
+    """Start a stream for a channel"""
+    if channel in active_streams:
+        return active_streams[channel]  # Already streaming
+    
     thread = threading.Thread(
         target=stream,
         args=(channel, callback)
     )
+    # Add to active_streams BEFORE starting thread (fixes race condition)
+    active_streams[channel] = thread
     thread.start()
     return thread
+
+def stopStream(channel: str):
+    """Stop streaming a specific channel"""
+    if channel in active_streams:
+        del active_streams[channel]
+        return True
+    return False
+
+def getActiveChannels():
+    """Return list of active channels"""
+    return list(active_streams.keys())
 
 def send(channel: str, payload: dict):
     encoded_payload = quote(json.dumps(payload), safe='')
