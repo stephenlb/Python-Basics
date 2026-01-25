@@ -6,6 +6,7 @@ import time
 import json
 import requests
 import threading
+from urllib.parse import quote
 
 publishKey = 'demo'
 subscribeKey = 'demo'
@@ -43,7 +44,8 @@ def startStream(channel: str, callback):
     return thread
 
 def send(channel: str, payload: dict):
-    send_url = f'https://ps.pndsn.com/publish/{publishKey}/{subscribeKey}/0/{channel}/0/{json.dumps(payload)}'
+    encoded_payload = quote(json.dumps(payload), safe='')
+    send_url = f'https://ps.pndsn.com/publish/{publishKey}/{subscribeKey}/0/{channel}/0/{encoded_payload}'
     try:
         response = requests.get(send_url)
         return response.json()
