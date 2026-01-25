@@ -52,6 +52,18 @@ def send(channel: str, payload: dict):
     except Exception as e:
         print(e)
         return None
+
+def getHistory(channel: str, count: int = 10):
+    """Fetch recent messages from a channel"""
+    history_url = f'https://ps.pndsn.com/v2/history/sub-key/{subscribeKey}/channel/{channel}?count={count}'
+    try:
+        response = requests.get(history_url)
+        data = response.json()
+        # Messages are in data[0]
+        return data[0] if data else []
+    except Exception as e:
+        print(e)
+        return []
         
 ## Test for the module
 if __name__ == '__main__':

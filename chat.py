@@ -54,6 +54,22 @@ if not current_user:
 
 print(f"{GREEN}Joined as {current_user}. Type 'logout' to exit.{RESET}\n")
 
+# Fetch and display message history
+print(f"{YELLOW}--- Recent Messages ---{RESET}")
+history = communication.getHistory(channel, 10)
+if history:
+    for msg in history:
+        if isinstance(msg, dict):
+            user = msg.get("user", "Unknown")
+            text = msg.get("message", "")
+            if "SYSTEM" in user:
+                print(f"{YELLOW}⚡ {text}{RESET}")
+            else:
+                print(f"{CYAN}← [{user}]: {text}{RESET}")
+else:
+    print(f"{CYAN}No message history yet.{RESET}")
+print(f"{YELLOW}--- End of History ---{RESET}\n")
+
 # Start listening for messages
 communication.startStream(channel, on_message_received)
 
