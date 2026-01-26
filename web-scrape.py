@@ -23,7 +23,6 @@
 ## fetch then parse for <a> anchor tags
 
 
-## TODO PDF READER
 import re
 import sys
 import uuid
@@ -34,17 +33,32 @@ import requests
 import asyncio
 
 ## URL Fetcher Worker
+## How to bypass the bot detectors
+## - user agent
+## - , 'Cookie': 'paset here' - bypass user human verificatin
+## - ignore robots.txt - not nice, but everyone does it anyway
+## - use a domastic residential IP address
+## - 
+def relativeFix(url):
+    return url
+    ## check if url is root or withtout
+    ## fix relative paths so they become absolute
+    
+user_agent = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36'
+headers = {'User-Agent': user_agent}
+rootUrl = None
+completedUrls = {}
+## TODO spin up multiple web fetches ( it is the slowest )
 def url_fetch_worker(urls: Queue, pages: Queue):
-    user_agent = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36'
-    headers = {'User-Agent': user_agent}
     ## TODO
     ## TODO
-    completedUrls = {}
     ## TODO
-    ## TODO prevent re-downloaded previous URLS
+    ## TODO PDF READER
+    ## TODO ✅ prevent re-downloaded previous URLS
     ## TODO relative url support ( href=/asdfasf )
     ## TODO max depth ( to prevent too much download )
-    ## TODO domain lock  so we don't donwload the ENTIRE WEB
+    ## TODO limit number of URLs
+    ## TODO domain lock so we don't donwload the ENTIRE WEB
     ## TODO
     while True:
         if urls.empty():
@@ -52,6 +66,10 @@ def url_fetch_worker(urls: Queue, pages: Queue):
             time.sleep(1)
             continue
         url = urls.get()
+        url = relativeFix(url)
+        if url in completedUrls:
+            print("already saw this URL")
+            continue
         try:
             response = requests.get(
                 url,
@@ -63,9 +81,8 @@ def url_fetch_worker(urls: Queue, pages: Queue):
         except Exception as e:
             print(f'Failed to get URL: {url}')
             print(e)
-        finally:
-            pass
     
+    completedUrls[url] = True
     return "done"
 
 ## HTML Parser
@@ -88,6 +105,7 @@ def html_parser_worker(urls: Queue, pages: Queue):
             file.write(page)
 
 async def main():
+    global rootUrl
     ## List of URLS we need to fetch
     urls = queue.Queue()
 

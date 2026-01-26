@@ -23,6 +23,7 @@ vim - stock vim
  scikit
  pytorch
  matplotlib
+ keras tensorflow
  - [x] Literals
  - [x] Variables
  - [x] Flow control (if/elif/else)
@@ -112,7 +113,7 @@ vim - stock vim
 
  - [ ] AI 
      - [ ] Huggingface Pipeslines
-     - [ ] Pytorch tensor/matrix
+     - [ ] Pytorch tensor/matrix manipulations
      - [ ] Computer vision
 
  - [ ] End project to wrap up the series
