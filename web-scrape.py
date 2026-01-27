@@ -32,6 +32,10 @@ import requests
 #import threading
 import asyncio
 
+TOTAL_URLS_CAPUTRED = 0
+MAX_URLS = 100
+MAX_DEPTH = 2
+
 ## URL Fetcher Worker
 ## How to bypass the bot detectors
 ## - user agent
@@ -69,14 +73,15 @@ def url_fetch_worker(urls: Queue, pages: Queue):
     ## TODO ✅ prevent re-downloaded previous URLS
     ## TODO ✅ relative url support ( href=/asdfasf )
     ## TODO ✅ domain lock so we don't donwload the ENTIRE WEB
+    ## TODO ✅ limit number of URLs
     ## TODO max depth ( to prevent too much download )
-    ## TODO limit number of URLs
     ## TODO
     while True:
         if urls.empty():
             print("no urls, sleeping for 1 second")
             time.sleep(1)
             continue
+
         urlObj = urls.get()
         url = relativeUrlToAbsoluteUrl(urlObj['url'])
 
@@ -111,7 +116,8 @@ def html_parser_worker(urls: Queue, pages: Queue):
             print('no pages, sleeping for 1 second')
             time.sleep(1)
             continue
-        page = pages.get()
+        pageObj = pages.get()
+        page = pageObj['page']
 
         ## Parse for more links to crawl
         links = re.findall(find_urls, page)
@@ -123,6 +129,14 @@ def html_parser_worker(urls: Queue, pages: Queue):
             file.write(page)
 
 def addUrl(urls, url, depth):
+    global TOTAL_URLS_CAPUTRED
+    TOTAL_URLS_CAPUTRED += 1
+    if TOTAL_URLS_CAPUTRED > MAX_URLS:
+        print("DONE, all MAX_URLS condition met")
+        print("DONE, all MAX_URLS condition met")
+        print("DONE, all MAX_URLS condition met")
+        return None
+        
     urls.put({
         'url': url,
         'depth': depth,
@@ -135,15 +149,14 @@ def addPage(pages, page, depth):
     })
 
 async def main():
-    global rootUrl
     ## List of URLS we need to fetch
     urls = queue.Queue()
 
-    max_urls = 100
-    max_depth = 2
-
     ## HTML pages ready for parse
     pages = queue.Queue()
+
+    ## Config
+    global rootUrl
 
     ## Check Command line user input for root URL
     if len(sys.argv) < 2:
