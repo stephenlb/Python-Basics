@@ -39,11 +39,23 @@ import asyncio
 ## - ignore robots.txt - not nice, but everyone does it anyway
 ## - use a domastic residential IP address
 ## - 
-def relativeFix(url):
+def relativeUrlToAbsoluteUrl(url):
+    if 'http' in url and not(rootUrl in url):
+        print(f'skipping url because it is outside the domain: {url}')
+        return None
+
+    while url[0] == '/':
+        url = url[1:]
+    if not (rootUrl in url):
+        ## we need to append the root url 
+        url = f'{rootUrl}{url}'
+    print(url)
+    print(url)
+    print(url)
     return url
     ## check if url is root or withtout
     ## fix relative paths so they become absolute
-    
+
 user_agent = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36'
 headers = {'User-Agent': user_agent}
 rootUrl = None
@@ -55,28 +67,34 @@ def url_fetch_worker(urls: Queue, pages: Queue):
     ## TODO
     ## TODO PDF READER
     ## TODO ✅ prevent re-downloaded previous URLS
-    ## TODO relative url support ( href=/asdfasf )
+    ## TODO ✅ relative url support ( href=/asdfasf )
+    ## TODO ✅ domain lock so we don't donwload the ENTIRE WEB
     ## TODO max depth ( to prevent too much download )
     ## TODO limit number of URLs
-    ## TODO domain lock so we don't donwload the ENTIRE WEB
     ## TODO
     while True:
         if urls.empty():
             print("no urls, sleeping for 1 second")
             time.sleep(1)
             continue
-        url = urls.get()
-        url = relativeFix(url)
+        urlObj = urls.get()
+        url = relativeUrlToAbsoluteUrl(urlObj['url'])
+
+        ## May have been filtered out from above function
+        if not url:
+            continue
+
         if url in completedUrls:
             print("already saw this URL")
             continue
+
         try:
             response = requests.get(
                 url,
                 headers=headers,
                 timeout=10
             )
-            pages.put(response.text)
+            addPage(pages, response.text, 1) ## TODO DEPTH
             print(f'Captured Successfully {url}')
         except Exception as e:
             print(f'Failed to get URL: {url}')
@@ -98,16 +116,31 @@ def html_parser_worker(urls: Queue, pages: Queue):
         ## Parse for more links to crawl
         links = re.findall(find_urls, page)
         for link in links:
-            urls.put(link)
+            addUrl(urls, link, 1) ## TODO we need DEPTH
 
         ## Save data it is gold
         with open(f'downloads/page_{str(uuid.uuid8())}', 'w') as file:
             file.write(page)
 
+def addUrl(urls, url, depth):
+    urls.put({
+        'url': url,
+        'depth': depth,
+    })
+
+def addPage(pages, page, depth):
+    pages.put({
+        'page': page,
+        'depth': depth,
+    })
+
 async def main():
     global rootUrl
     ## List of URLS we need to fetch
     urls = queue.Queue()
+
+    max_urls = 100
+    max_depth = 2
 
     ## HTML pages ready for parse
     pages = queue.Queue()
@@ -121,7 +154,7 @@ async def main():
         return
 
     rootUrl = sys.argv[1]
-    urls.put(rootUrl)
+    addUrl(urls, rootUrl, 0)
     print(f'Root url starting at: "{rootUrl=}"')
 
     results = await asyncio.gather(

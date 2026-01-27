@@ -55,6 +55,7 @@ vim - stock vim
  - [x] Double Linked List sorted binary tree!????
  - [x] List Comprehension
  - [x] Dictionary Comprehension
+ - [ ] rich library for pretty colors ( Janlu )
  - [ ] functools
  - [ ] Type casting
  - [ ] Writing/Reading files
