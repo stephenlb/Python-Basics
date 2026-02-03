@@ -1,5 +1,5 @@
 ## chat.py
-## Simple chat client with multi-channel support
+## Simple chat client with multi-channel support and error handling
 import communication
 import sys
 from datetime import datetime
@@ -25,19 +25,41 @@ def format_time():
 def show_history(channel, count=10):
     """Display message history for a channel"""
     print(f"\n{YELLOW}--- Last {count} messages in #{channel} ---{RESET}")
-    history = communication.getHistory(channel, count)
-    if history:
-        for msg in history:
-            if isinstance(msg, dict):
-                user = msg.get("user", "Unknown")
-                text = msg.get("message", "")
-                if "SYSTEM" in user:
-                    print(f"{YELLOW}⚡ {text}{RESET}")
-                else:
-                    print(f"{CYAN}← [{user}]: {text}{RESET}")
+    result = communication.getHistory(channel, count)
+    
+    if result["success"]:
+        history = result["data"]
+        if history:
+            for msg in history:
+                if isinstance(msg, dict):
+                    user = msg.get("user", "Unknown")
+                    text = msg.get("message", "")
+                    if "SYSTEM" in user:
+                        print(f"{YELLOW}⚡ {text}{RESET}")
+                    else:
+                        print(f"{CYAN}← [{user}]: {text}{RESET}")
+        else:
+            print(f"{CYAN}No message history yet.{RESET}")
     else:
-        print(f"{CYAN}No message history yet.{RESET}")
+        print(f"{RED}❌ Could not fetch history: {result['error']}{RESET}")
+        
     print(f"{YELLOW}--- End of History ---{RESET}\n")
+
+def show_logs(count=20):
+    """Display internal technical logs"""
+    print(f"\n{RED}--- Technical Diagnostic Logs (Last {count}) ---{RESET}")
+    logs = communication.get_logs(count)
+    if logs:
+        for log in logs:
+            if "ERROR" in log or "CRITICAL" in log:
+                print(f"{RED}{log}{RESET}")
+            elif "SUCCESS" in log:
+                print(f"{GREEN}{log}{RESET}")
+            else:
+                print(f"{YELLOW}{log}{RESET}")
+    else:
+        print(f"{CYAN}No diagnostic logs captured yet.{RESET}")
+    print(f"{RED}--- End of Logs ---{RESET}\n")
 
 def show_help():
     """Display available commands"""
@@ -53,6 +75,7 @@ def show_help():
 ║  {CYAN}/broadcast{YELLOW}    - Send to ALL channels   ║
 ║  {CYAN}/history{YELLOW}      - Show last 10 messages  ║
 ║  {CYAN}/history N{YELLOW}    - Show last N messages   ║
+║  {CYAN}/logs{YELLOW}         - Show technical logs    ║
 ║  {CYAN}/clear{YELLOW}        - Clear the screen       ║
 ║  {CYAN}/logout{YELLOW}       - Leave the chat         ║
 ╚══════════════════════════════════════════╝{RESET}
@@ -90,9 +113,13 @@ def join_channel(channel_name):
     
     communication.startStream(channel_name, on_message_received)
     join_msg = {"user": "SYSTEM", "message": f"{current_user} has joined"}
-    communication.send(channel_name, join_msg)
-    current_channel = channel_name
-    print(f"{GREEN}Joined #{channel_name} and switched to it{RESET}")
+    status = communication.send(channel_name, join_msg)
+    
+    if status["success"]:
+        current_channel = channel_name
+        print(f"{GREEN}Joined #{channel_name} and switched to it{RESET}")
+    else:
+        print(f"{RED}❌ Error joining #{channel_name}: {status['error']}{RESET}")
 
 def leave_channel(channel_name):
     """Leave a channel"""
@@ -113,14 +140,17 @@ def leave_channel(channel_name):
         return
     
     leave_msg = {"user": "SYSTEM", "message": f"{current_user} has left"}
-    communication.send(channel_name, leave_msg)
-    communication.stopStream(channel_name)
+    status = communication.send(channel_name, leave_msg)
     
-    if current_channel == channel_name:
-        current_channel = communication.getActiveChannels()[0]
-        print(f"{YELLOW}Left #{channel_name}, switched to #{current_channel}{RESET}")
+    if status["success"]:
+        communication.stopStream(channel_name)
+        if current_channel == channel_name:
+            current_channel = communication.getActiveChannels()[0]
+            print(f"{YELLOW}Left #{channel_name}, switched to #{current_channel}{RESET}")
+        else:
+            print(f"{YELLOW}Left #{channel_name}{RESET}")
     else:
-        print(f"{YELLOW}Left #{channel_name}{RESET}")
+        print(f"{RED}❌ Error leaving #{channel_name}: {status['error']}{RESET}")
 
 def switch_channel(channel_name):
     """Switch to a different channel"""
@@ -169,6 +199,15 @@ def handle_command(command):
                 print(f"{RED}Invalid number. Using default (10).{RESET}")
         show_history(current_channel, count)
     
+    elif cmd == "logs":
+        count = 20
+        if args:
+            try:
+                count = int(args[0])
+            except ValueError:
+                pass
+        show_logs(count)
+    
     elif cmd == "clear":
         clear_screen()
     
@@ -177,11 +216,20 @@ def handle_command(command):
             print(f"{RED}Usage: /broadcast your message here{RESET}")
             return
         broadcast_text = ' '.join(args)
+        success_count = 0
+        total_channels = 0
         for ch in communication.getActiveChannels():
+            total_channels += 1
             payload = {"user": current_user, "message": broadcast_text, "broadcast": True}
-            communication.send(ch, payload)
+            status = communication.send(ch, payload)
+            if status["success"]:
+                success_count += 1
+        
         time_str = format_time()
-        print(f"{MAGENTA}[{time_str}] 📢 Broadcast: {broadcast_text}{RESET}")
+        if success_count == total_channels:
+            print(f"{MAGENTA}[{time_str}] 📢 Broadcast to {success_count} channels: {broadcast_text}{RESET}")
+        else:
+            print(f"{YELLOW}[{time_str}] 📢 Broadcast partially sent ({success_count}/{total_channels} channels).{RESET}")
     
     elif cmd == "logout":
         # Leave all channels gracefully
@@ -239,7 +287,9 @@ communication.startStream(current_channel, on_message_received)
 
 # Announce that we joined
 join_msg = {"user": "SYSTEM", "message": f"{current_user} has joined"}
-communication.send(current_channel, join_msg)
+status = communication.send(current_channel, join_msg)
+if not status["success"]:
+    print(f"{RED}⚠️ Warning: Could not send join notification to #{current_channel} ({status['error']}){RESET}")
 
 # Main loop
 while True:
@@ -255,7 +305,10 @@ while True:
     
     # Send the message to current channel
     payload = {"user": current_user, "message": message}
-    communication.send(current_channel, payload)
+    status = communication.send(current_channel, payload)
     
     time_str = format_time()
-    print(f"{GREEN}[{time_str}] → {message}{RESET}")
+    if status["success"]:
+        print(f"{GREEN}[{time_str}] → {message}{RESET}")
+    else:
+        print(f"{RED}❌ Failed to send: {status['error']}{RESET}")
